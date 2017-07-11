@@ -1,4 +1,3 @@
-extern crate bincode;
 extern crate byteorder;
 
 use std::io::prelude::*;

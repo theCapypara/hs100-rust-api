@@ -5,5 +5,4 @@ authors = ["Alexandre Beslic <alexandre.beslic@gmail.com>"]
 description = "A library to manipulate and get data from a TP-Link HS-100/110 smart plugs"
 
 [dependencies]
-bincode = "0.8.0"
 byteorder = "1.1"
