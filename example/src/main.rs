@@ -11,5 +11,15 @@ fn main() {
     println!("[sysinfo]: {}\n", resp);
 
     let resp = api.meterinfo();
-    println!("[meterinfo]: {}", resp);
+    println!("[meterinfo]: {}\n", resp);
+
+    let resp = api.dailystats(7, 2017);
+    println!("[dailystats]: {}", resp);
+
+    //
+    // Avoid these if the HS100 is plugged to your computer :)
+    //
+
+    // let resp = api.off();
+    // let resp = api.on();
 }
