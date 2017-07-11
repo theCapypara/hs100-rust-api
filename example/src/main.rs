@@ -1,16 +1,15 @@
 extern crate hs100;
 
-use hs100::{encrypt, decrypt, send};
+use hs100::SmartPlug;
 
 const HOST: &'static str = "192.168.0.37:9999";
 
 fn main() {
-    let json = "{\"system\":{\"get_sysinfo\":{}}}";
+    let api = SmartPlug::new(HOST);
 
-    // encrypt
-    let msg = encrypt(json);
-    let mut data = send(HOST, &msg);
-    let resp = decrypt(&mut data.split_off(4));
+    let resp = api.sysinfo();
+    println!("[sysinfo]: {}\n", resp);
 
-    println!("resp: {}", resp)
+    let resp = api.meterinfo();
+    println!("[meterinfo]: {}", resp);
 }
