@@ -4,7 +4,13 @@ use std::io::prelude::*;
 use std::net::TcpStream;
 use byteorder::{BigEndian, WriteBytesExt};
 use std::time::Duration;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 use std::str;
+
+mod types;
+use types::*;
 
 pub struct SmartPlug {
     ip: &'static str,
@@ -21,11 +27,6 @@ impl SmartPlug {
         decrypt(&mut data.split_off(4))
     }
 
-    pub fn sysinfo(&self) -> String {
-        let json = "{\"system\":{\"get_sysinfo\":{}}}";
-        self.submit(json)
-    }
-
     pub fn on(&self) -> String {
         let json = "{\"system\":{\"set_relay_state\":{\"state\":1}}}";
         self.submit(json)
@@ -36,18 +37,26 @@ impl SmartPlug {
         self.submit(json)
     }
 
-    pub fn meterinfo(&self) -> String {
-        let json = "{\"system\":{\"get_sysinfo\":{}}, \"emeter\":{\"get_realtime\":{},\"get_vgain_igain\":{}}}";
-        self.submit(json)
+    pub fn sysinfo(&self) -> PlugInfo {
+        let json = "{\"system\":{\"get_sysinfo\":{}}}";
+        let data = self.submit(json);
+        serde_json::from_str(&data).unwrap()
     }
 
-    pub fn dailystats(&self, month: i32, year: i32) -> String {
+    pub fn meterinfo(&self) -> PlugInfo {
+        let json = "{\"system\":{\"get_sysinfo\":{}}, \"emeter\":{\"get_realtime\":{},\"get_vgain_igain\":{}}}";
+        let data = self.submit(json);
+        serde_json::from_str(&data).unwrap()
+    }
+
+    pub fn dailystats(&self, month: i32, year: i32) -> PlugInfo {
         let json = format!(
             "{{\"emeter\":{{\"get_daystat\":{{\"month\":{},\"year\":{}}}}}}}",
             month,
             year
         );
-        self.submit(&json)
+        let data = self.submit(&json);
+        serde_json::from_str(&data).unwrap()
     }
 
     fn send(&self, ip: &str, payload: &[u8]) -> Vec<u8> {
