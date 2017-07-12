@@ -4,7 +4,7 @@ pub struct SystemGetSysinfo {
     pub sw_ver: String,
     pub hw_ver: String,
     #[serde(rename = "type")]
-    pub hwtype: String,
+    pub hw_type: String,
     pub model: String,
     pub mac: String,
     #[serde(rename = "deviceId")]
