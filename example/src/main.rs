@@ -1,7 +1,7 @@
-extern crate hs100;
+extern crate hs100api;
 
-use hs100::SmartPlug;
-use hs100::error::Error;
+use hs100api::SmartPlug;
+use hs100api::error::Error;
 
 const HOST: &'static str = "192.168.0.37:9999";
 

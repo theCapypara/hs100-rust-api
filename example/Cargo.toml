@@ -3,5 +3,5 @@ name = "example"
 version = "0.1.0"
 authors = ["Alexandre Beslic <alexandre.beslic@gmail.com>"]
 
-[dependencies.hs100]
+[dependencies.hs100api]
 path = ".."
