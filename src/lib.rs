@@ -1,16 +1,19 @@
 extern crate byteorder;
 
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 use std::io::prelude::*;
 use std::net::TcpStream;
 use byteorder::{BigEndian, WriteBytesExt};
 use std::time::Duration;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
 use std::str;
 
-mod types;
+pub mod types;
+pub mod error;
+
 use types::*;
+use error::*;
 
 pub struct SmartPlug {
     ip: &'static str,
@@ -21,65 +24,59 @@ impl SmartPlug {
         SmartPlug { ip: ip }
     }
 
-    fn submit(&self, msg: &str) -> String {
-        let msg = encrypt(msg);
-        let mut data = self.send(self.ip, &msg);
-        decrypt(&mut data.split_off(4))
-    }
-
-    pub fn on(&self) -> String {
+    // Wakes up the device
+    pub fn on(&self) -> Result<PlugInfo, Error> {
         let json = "{\"system\":{\"set_relay_state\":{\"state\":1}}}";
-        self.submit(json)
+        self.submit_to_device(json)
     }
 
-    pub fn off(&self) -> String {
+    // Turns off the device
+    pub fn off(&self) -> Result<PlugInfo, Error> {
         let json = "{\"system\":{\"set_relay_state\":{\"state\":0}}}";
-        self.submit(json)
+        self.submit_to_device(json)
     }
 
-    pub fn sysinfo(&self) -> PlugInfo {
+    // Gather system wide info such as model of the device, etc.
+    pub fn sysinfo(&self) -> Result<PlugInfo, Error> {
         let json = "{\"system\":{\"get_sysinfo\":{}}}";
-        let data = self.submit(json);
-        serde_json::from_str(&data).unwrap()
+        self.submit_to_device(json)
     }
 
-    pub fn meterinfo(&self) -> PlugInfo {
+    // Gather system information as well as watt meter information
+    pub fn meterinfo(&self) -> Result<PlugInfo, Error> {
         let json = "{\"system\":{\"get_sysinfo\":{}}, \"emeter\":{\"get_realtime\":{},\"get_vgain_igain\":{}}}";
-        let data = self.submit(json);
-        serde_json::from_str(&data).unwrap()
+        self.submit_to_device(json)
     }
 
-    pub fn dailystats(&self, month: i32, year: i32) -> PlugInfo {
+    // Returns system information as well as daily statistics of power usage
+    pub fn dailystats(&self, month: i32, year: i32) -> Result<PlugInfo, Error> {
         let json = format!(
             "{{\"emeter\":{{\"get_daystat\":{{\"month\":{},\"year\":{}}}}}}}",
             month,
             year
         );
-        let data = self.submit(&json);
-        serde_json::from_str(&data).unwrap()
+        self.submit_to_device(&json)
     }
 
-    fn send(&self, ip: &str, payload: &[u8]) -> Vec<u8> {
-        let mut stream = TcpStream::connect(ip).expect("Couldn't connect to the server...");
-        stream.set_read_timeout(Some(Duration::new(5, 0))).expect(
-            "set_read_timeout call failed",
-        );
-        stream.write_all(payload).unwrap();
+    fn submit_to_device(&self, msg: &str) -> Result<PlugInfo, Error> {
+        let msg = try!(encrypt(msg));
+        let mut resp = try!(send(self.ip, &msg));
+        let data = decrypt(&mut resp.split_off(4));
 
-        let mut response = vec![];
-        stream.read_to_end(&mut response).expect("Could not read");
+        // deserialize json
+        let resp = try!(serde_json::from_str(&data));
 
-        response
+        Ok(resp)
     }
 }
 
-fn encrypt(plain: &str) -> Vec<u8> {
+// Prepare and encrypt message to send to the device
+// see: https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/
+fn encrypt(plain: &str) -> Result<Vec<u8>, Error> {
     let len = plain.len();
     let msgbytes = plain.as_bytes();
     let mut cipher = vec![];
-    cipher.write_u32::<BigEndian>(len as u32).expect(
-        "Can't write header",
-    );
+    try!(cipher.write_u32::<BigEndian>(len as u32));
 
     let mut key = 0xAB;
     let mut payload: Vec<u8> = Vec::with_capacity(len);
@@ -90,12 +87,14 @@ fn encrypt(plain: &str) -> Vec<u8> {
     }
 
     for i in &payload {
-        cipher.write_u8(*i).expect("Can't write message");
+        try!(cipher.write_u8(*i));
     }
 
-    cipher
+    Ok(cipher)
 }
 
+// Decrypt received string
+// see: https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/
 fn decrypt(cipher: &mut [u8]) -> String {
     let len = cipher.len();
 
@@ -109,6 +108,19 @@ fn decrypt(cipher: &mut [u8]) -> String {
     }
 
     String::from_utf8_lossy(cipher).into_owned()
+}
+
+// Sends a message to the device and awaits a response synchronously
+fn send(ip: &str, payload: &[u8]) -> Result<Vec<u8>, Error> {
+    let mut stream = try!(TcpStream::connect(ip));
+
+    try!(stream.set_read_timeout(Some(Duration::new(5, 0))));
+    try!(stream.write_all(payload));
+
+    let mut resp = vec![];
+    try!(stream.read_to_end(&mut resp));
+
+    Ok(resp)
 }
 
 #[cfg(test)]

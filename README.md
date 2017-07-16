@@ -13,45 +13,39 @@ Resource on Reverse Engineering the HS110: https://www.softscheck.com/en/reverse
 extern crate hs100;
 
 use hs100::SmartPlug;
+use hs100::error::Error;
 
-const HOST: &'static str = "192.168.0.37:9999";
+const HOST: &'static str = "192.168.0.37:9999"; // your device IP
 
 fn main() {
     let api = SmartPlug::new(HOST);
 
+    // Quick example:
     println!("[sysinfo]: {:?}\n", api.sysinfo());
     println!("[meterinfo]: {:?}\n", api.meterinfo());
     println!("[dailystats]: {:?}\n", api.dailystats(7, 2017));
 
-    // Print specific property, it's "safe" to unwrap as long as:
-    //    for meterinfo() -> get_realtime
-    //    for dailystats() -> get_daystat
-    //    etc. see types.rs for more info on types using Options
-    //
-    //    otherwise -> use match and handle error case properly.
-    println!(
-        "[watt]: {}",
-        api.meterinfo()
-            .emeter
-            .unwrap()
-            .get_realtime
-            .unwrap()
-            .current
-    )
+    // Handle specific error types:
+    match api.sysinfo() {
+        Ok(info) => println!("[sysinfo]: {:?}\n", info),
+        Err(err) => {
+            match err {
+                Error::IoError(_) => println!("some io error occurred"),
+                Error::EncryptError => println!("error encrypting the message"),
+                Error::DeserializeError(_) => println!("couldn't deserialize the message"),
+            }
+        }
+    }
 
-    //
-    // Avoid these if the HS100 is plugged to your computer :)
-    //
-
-    // let resp = api.off();
-    // let resp = api.on();
+    // See the example folder for more usage patterns.
 }
 ```
 
 # TODO
 
 - ~~Deserialize json into structs~~
-- Proper error handling
+- ~~Proper error handling~~
+- Use Futures / asynchronous I/O
 
 # License
 
