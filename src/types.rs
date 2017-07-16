@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SystemGetSysinfo {
     pub err_code: i64,
     pub sw_ver: String,
@@ -29,12 +29,12 @@ pub struct SystemGetSysinfo {
     pub longitude: f64,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct System {
     pub get_sysinfo: SystemGetSysinfo,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct EmeterGetRealtime {
     pub current: f64,
     pub voltage: f64,
@@ -43,21 +43,21 @@ pub struct EmeterGetRealtime {
     pub err_code: i64,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct EmeterGetVgainIgain {
     pub vgain: i64,
     pub igain: i64,
     pub err_code: i64,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Emeter {
     pub get_realtime: Option<EmeterGetRealtime>,
     pub get_daystat: Option<EmeterGetDaystat>,
     pub get_vgain_igain: Option<EmeterGetVgainIgain>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct EmeterGetDaystatDayList {
     pub year: i64,
     pub month: i64,
@@ -65,13 +65,13 @@ pub struct EmeterGetDaystatDayList {
     pub energy: f64,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct EmeterGetDaystat {
     pub day_list: Vec<EmeterGetDaystatDayList>,
     pub err_code: i64,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PlugInfo {
     pub system: Option<System>,
     pub emeter: Option<Emeter>,
