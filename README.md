@@ -1,6 +1,8 @@
 HS100 API for Rust
 ====
 
+[![CratesIo](https://img.shields.io/crates/v/hs100api.svg)](https://crates.io/crates/hs100api)
+
 Simple library in Rust to access HS100/110 functions.
 
 Special thanks to: https://github.com/sausheong/hs1xxplug for the Go version (which this library is basically a port from).
