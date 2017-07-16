@@ -1,6 +1,6 @@
 [package]
 name = "hs100api"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Alexandre Beslic <alexandre.beslic@gmail.com>"]
 description = "A library to manipulate and get data from a TP-Link HS-100/110 smart plugs"
 repository = "https://github.com/abronan/hs100-rust-api"
