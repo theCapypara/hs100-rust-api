@@ -59,12 +59,12 @@ impl SmartPlug {
     }
 
     fn submit_to_device(&self, msg: &str) -> Result<PlugInfo, Error> {
-        let msg = try!(encrypt(msg));
-        let mut resp = try!(send(self.ip, &msg));
+        let msg = encrypt(msg)?;
+        let mut resp = send(self.ip, &msg)?;
         let data = decrypt(&mut resp.split_off(4));
 
         // deserialize json
-        let resp = try!(serde_json::from_str(&data));
+        let resp = serde_json::from_str(&data)?;
 
         Ok(resp)
     }
@@ -76,7 +76,7 @@ fn encrypt(plain: &str) -> Result<Vec<u8>, Error> {
     let len = plain.len();
     let msgbytes = plain.as_bytes();
     let mut cipher = vec![];
-    try!(cipher.write_u32::<BigEndian>(len as u32));
+    cipher.write_u32::<BigEndian>(len as u32)?;
 
     let mut key = 0xAB;
     let mut payload: Vec<u8> = Vec::with_capacity(len);
@@ -87,7 +87,7 @@ fn encrypt(plain: &str) -> Result<Vec<u8>, Error> {
     }
 
     for i in &payload {
-        try!(cipher.write_u8(*i));
+        cipher.write_u8(*i)?;
     }
 
     Ok(cipher)
@@ -112,13 +112,13 @@ fn decrypt(cipher: &mut [u8]) -> String {
 
 // Sends a message to the device and awaits a response synchronously
 fn send(ip: &str, payload: &[u8]) -> Result<Vec<u8>, Error> {
-    let mut stream = try!(TcpStream::connect(ip));
+    let mut stream = TcpStream::connect(ip)?;
 
-    try!(stream.set_read_timeout(Some(Duration::new(5, 0))));
-    try!(stream.write_all(payload));
+    stream.set_read_timeout(Some(Duration::new(5, 0)))?;
+    stream.write_all(payload)?;
 
     let mut resp = vec![];
-    try!(stream.read_to_end(&mut resp));
+    stream.read_to_end(&mut resp)?;
 
     Ok(resp)
 }
