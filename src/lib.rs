@@ -1,8 +1,5 @@
-extern crate byteorder;
-
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_json;
 use byteorder::{BigEndian, WriteBytesExt};
 use std::io::prelude::*;
 use std::net::TcpStream;

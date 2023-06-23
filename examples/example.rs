@@ -1,5 +1,3 @@
-extern crate hs100api;
-
 use hs100api::error::Error;
 use hs100api::SmartPlug;
 
