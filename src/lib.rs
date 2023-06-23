@@ -3,17 +3,17 @@ extern crate byteorder;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+use byteorder::{BigEndian, WriteBytesExt};
 use std::io::prelude::*;
 use std::net::TcpStream;
-use byteorder::{BigEndian, WriteBytesExt};
-use std::time::Duration;
 use std::str;
+use std::time::Duration;
 
-pub mod types;
 pub mod error;
+pub mod types;
 
-use types::*;
 use error::*;
+use types::*;
 
 pub struct SmartPlug {
     ip: &'static str,
@@ -52,8 +52,7 @@ impl SmartPlug {
     pub fn dailystats(&self, month: i32, year: i32) -> Result<PlugInfo, Error> {
         let json = format!(
             "{{\"emeter\":{{\"get_daystat\":{{\"month\":{},\"year\":{}}}}}}}",
-            month,
-            year
+            month, year
         );
         self.submit_to_device(&json)
     }
@@ -126,8 +125,8 @@ fn send(ip: &str, payload: &[u8]) -> Result<Vec<u8>, Error> {
 
 #[cfg(test)]
 mod tests {
-    use encrypt;
     use decrypt;
+    use encrypt;
 
     #[test]
     fn encrypt_decrypt() {

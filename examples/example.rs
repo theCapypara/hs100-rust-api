@@ -1,7 +1,7 @@
 extern crate hs100api;
 
-use hs100api::SmartPlug;
 use hs100api::error::Error;
+use hs100api::SmartPlug;
 
 const HOST: &str = "192.168.0.37:9999";
 
@@ -22,13 +22,11 @@ fn main() {
     // Handle specific error types
     match api.sysinfo() {
         Ok(info) => println!("[sysinfo]: {:?}\n", info),
-        Err(err) => {
-            match err {
-                Error::IoError(_) => println!("some io error occurred"),
-                Error::EncryptError => println!("error encrypting the message"),
-                Error::DeserializeError(_) => println!("couldn't deserialize the message"),
-            }
-        }
+        Err(err) => match err {
+            Error::IoError(_) => println!("some io error occurred"),
+            Error::EncryptError => println!("error encrypting the message"),
+            Error::DeserializeError(_) => println!("couldn't deserialize the message"),
+        },
     }
 
     // Print specific property, it is "safe" to unwrap as long as:

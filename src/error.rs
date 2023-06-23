@@ -1,8 +1,8 @@
-use std::fmt;
-use std::error::Error as StdError;
-use std::io::Error as IoError;
 use serde_json::Error as JsonError;
 use std::convert::From;
+use std::error::Error as StdError;
+use std::fmt;
+use std::io::Error as IoError;
 
 #[derive(Debug)]
 pub enum Error {
