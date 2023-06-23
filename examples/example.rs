@@ -3,7 +3,7 @@ extern crate hs100api;
 use hs100api::SmartPlug;
 use hs100api::error::Error;
 
-const HOST: &'static str = "192.168.0.37:9999";
+const HOST: &str = "192.168.0.37:9999";
 
 fn main() {
     let api = SmartPlug::new(HOST);
