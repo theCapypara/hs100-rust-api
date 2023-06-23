@@ -26,14 +26,14 @@ impl SmartPlug {
     /// Wakes up the device
     #[maybe_async::maybe_async]
     pub async fn on(&self) -> Result<PlugInfo, Error> {
-        let json = "{\"system\":{\"set_relay_state\":{\"state\":1}}}";
+        let json = "{\"system\":{\"set_relay_state\":{\"state\":1},\"get_sysinfo\":{}}}";
         self.submit_to_device(json).await
     }
 
     /// Turns off the device
     #[maybe_async::maybe_async]
     pub async fn off(&self) -> Result<PlugInfo, Error> {
-        let json = "{\"system\":{\"set_relay_state\":{\"state\":0}}}";
+        let json = "{\"system\":{\"set_relay_state\":{\"state\":0},\"get_sysinfo\":{}}}";
         self.submit_to_device(json).await
     }
 
@@ -149,6 +149,7 @@ async fn send(ip: &str, payload: &[u8]) -> Result<Vec<u8>, Error> {
 mod tests {
     use super::decrypt;
     use super::encrypt;
+    use SmartPlug;
 
     #[test]
     fn encrypt_decrypt() {
@@ -158,5 +159,19 @@ mod tests {
         let resp = decrypt(&mut data.split_off(4));
 
         assert_eq!(json, resp);
+    }
+
+    #[test]
+    fn can_turn_on() {
+        let plug = SmartPlug::new("192.168.1.32:9999");
+
+        plug.on().unwrap();
+    }
+
+    #[test]
+    fn can_turn_off() {
+        let plug = SmartPlug::new("192.168.1.32:9999");
+
+        plug.off().unwrap();
     }
 }
