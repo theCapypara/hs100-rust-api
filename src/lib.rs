@@ -21,7 +21,7 @@ pub struct SmartPlug {
 
 impl SmartPlug {
     pub fn new(ip: &'static str) -> SmartPlug {
-        SmartPlug { ip: ip }
+        SmartPlug { ip }
     }
 
     // Wakes up the device
@@ -95,6 +95,7 @@ fn encrypt(plain: &str) -> Result<Vec<u8>, Error> {
 
 // Decrypt received string
 // see: https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/
+#[allow(clippy::needless_range_loop)]
 fn decrypt(cipher: &mut [u8]) -> String {
     let len = cipher.len();
 
