@@ -122,14 +122,14 @@ fn send(ip: &str, payload: &[u8]) -> Result<Vec<u8>, Error> {
 
 #[cfg(test)]
 mod tests {
-    use decrypt;
-    use encrypt;
+    use super::decrypt;
+    use super::encrypt;
 
     #[test]
     fn encrypt_decrypt() {
         let json = "{\"system\":{\"get_sysinfo\":{}}}";
 
-        let mut data = encrypt(json);
+        let mut data = encrypt(json).unwrap();
         let resp = decrypt(&mut data.split_off(4));
 
         assert_eq!(json, resp);
