@@ -3,6 +3,7 @@ extern crate serde_derive;
 #[cfg(feature = "async")]
 use async_std::{net::TcpStream as AsyncTcpStream, prelude::*};
 use byteorder::{BigEndian, WriteBytesExt};
+use std::borrow::Cow;
 use std::str;
 use std::time::Duration;
 #[cfg(feature = "sync")]
@@ -14,12 +15,12 @@ pub mod types;
 use error::*;
 use types::*;
 
-pub struct SmartPlug {
-    ip: &'static str,
+pub struct SmartPlug<'a> {
+    ip: Cow<'a, str>,
 }
 
-impl SmartPlug {
-    pub fn new(ip: &'static str) -> SmartPlug {
+impl<'a> SmartPlug<'a> {
+    pub fn new(ip: Cow<'a, str>) -> SmartPlug {
         SmartPlug { ip }
     }
 
@@ -64,7 +65,7 @@ impl SmartPlug {
     #[maybe_async::maybe_async]
     async fn submit_to_device(&self, msg: &str) -> Result<PlugInfo, Error> {
         let msg = encrypt(msg)?;
-        let mut resp = send(self.ip, &msg).await?;
+        let mut resp = send(self.ip.as_ref(), &msg).await?;
         let data = decrypt(&mut resp.split_off(4));
 
         // deserialize json
@@ -149,7 +150,7 @@ async fn send(ip: &str, payload: &[u8]) -> Result<Vec<u8>, Error> {
 mod tests {
     use super::decrypt;
     use super::encrypt;
-    use SmartPlug;
+    use super::SmartPlug;
 
     #[test]
     fn encrypt_decrypt() {
